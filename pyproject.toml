@@ -2,7 +2,7 @@
 name = "moonbot"
 version = "0.1.0"
 description = ""
-authors = ["Dmitrii Belov <dmitrii.belov99@gmail.com"]
+authors = ["Dmitrii Belov <dmitrii.belov99@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
