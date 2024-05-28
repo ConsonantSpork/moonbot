@@ -5,11 +5,6 @@ from moonbot.domain.bot import Bot, Direction, State
 from moonbot.domain.exceptions import InvalidCommand
 
 
-@pytest.fixture
-def bot():
-    return Bot(1, 2, Direction.WEST)
-
-
 def test_bot_returns_current_state(bot: Bot):
     assert bot.state == State(x=1, y=2, direction=Direction.WEST)
 
