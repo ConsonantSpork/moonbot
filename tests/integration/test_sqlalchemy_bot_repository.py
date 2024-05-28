@@ -1,19 +1,8 @@
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 from moonbot.adapters.bot_repository import SQLAlchemyBotRepository
 from moonbot.adapters.exceptions import BotNotFound
-from moonbot.adapters.orm import Base
 from moonbot.domain.bot import Bot
-
-
-@pytest.fixture
-def session():
-    engine = create_engine("sqlite://")
-    Base.metadata.create_all(engine)
-    session_factory = sessionmaker(engine)
-    return session_factory()
 
 
 @pytest.fixture
