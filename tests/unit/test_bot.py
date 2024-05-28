@@ -9,10 +9,9 @@ def test_bot_returns_current_state(bot: Bot):
     assert bot.state == State(x=1, y=2, direction=Direction.WEST)
 
 
-def test_bot_can_move_and_returns_new_state_after_moving(bot: Bot):
-    state = bot.move("FLFFFRFLB")
-    assert state == bot.state
-    assert state == State(x=-1, y=0, direction=Direction.SOUTH)
+def test_bot_can_move(bot: Bot):
+    bot.move("FLFFFRFLB")
+    assert bot.state == State(x=-1, y=0, direction=Direction.SOUTH)
 
 
 @pytest.mark.parametrize(
