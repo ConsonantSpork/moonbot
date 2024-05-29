@@ -29,6 +29,7 @@ def test_get_current_position(api_url):
 def test_move(api_url):
     response = post(api_url + "/move", params={"command": "FFFLF"})
     assert response.status_code == status.HTTP_200_OK
+    assert is_state_str(response.json())
     response = get(api_url + "/state")
     assert response.status_code == status.HTTP_200_OK
     assert is_state_str(response.json())
