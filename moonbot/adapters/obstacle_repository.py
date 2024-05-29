@@ -7,7 +7,7 @@ from moonbot.adapters.orm import Obstacle
 
 class ObstacleRepository(ABC):
     @abstractmethod
-    def add(self, obstacle: str) -> None:
+    def add(self, obstacle: tuple[int, int]) -> None:
         raise NotImplementedError
 
     @abstractmethod

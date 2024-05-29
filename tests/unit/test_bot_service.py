@@ -3,7 +3,8 @@ import pytest
 from moonbot.adapters.bot_repository import BotStateRepository
 from moonbot.adapters.command_repository import CommandRepository
 from moonbot.adapters.exceptions import BotStateNotFound
-from moonbot.domain.bot import Bot, Direction, State
+from moonbot.adapters.obstacle_repository import ObstacleRepository
+from moonbot.domain.bot import Bot, Direction, State, Status
 from moonbot.service.bot_service import DEFAULT_BOT_STATE, BotService
 from moonbot.service.uow import UnitOfWork
 
@@ -25,14 +26,26 @@ class FakeCommandRepository(CommandRepository):
     def __init__(self):
         self._commands = []
 
-    def add(self, command: str):
+    def add(self, command: str) -> None:
         self._commands.append(command)
+
+
+class FakeObstacleRepository(ObstacleRepository):
+    def __init__(self):
+        self._obstacles = set()
+
+    def add(self, obstacle: tuple[int, int]) -> None:
+        self._obstacles.add(obstacle)
+
+    def get(self) -> set[tuple[int, int]]:
+        return self._obstacles
 
 
 class FakeUnitOfWork(UnitOfWork):
     def __init__(self) -> None:
         self.bot_state = FakeBotStateRepository()
         self.commands = FakeCommandRepository()
+        self.obstacles = FakeObstacleRepository()
         self.commited = False
 
     def commit(self):
@@ -61,15 +74,16 @@ def test_get_current_state(uow):
     assert state == uow.bot_state.get()
 
 
-def test_move_returns_new_state(uow):
+def test_move_returns_new_state_and_status(uow):
     bot_service = BotService(uow)
     old_state = bot_service.get_current_state()
     command = "FFRFLB"
-    new_state = bot_service.move(command)
+    new_state, status = bot_service.move(command)
     bot = Bot(old_state.x, old_state.y, old_state.direction)
     bot.move(command)
     expected_state = bot.state
     assert new_state == expected_state
+    assert status == Status.SUCCESS
 
 
 def test_move_commits(uow):
@@ -103,3 +117,11 @@ def test_move_initializes_bot_state(uow_no_bot_state):
     bot_service = BotService(uow_no_bot_state)
     bot_service.move("BBFLRL")
     assert uow_no_bot_state.bot_state.get()
+
+
+def test_move_into_obstacle(uow):
+    uow.obstacles.add((-1, 2))
+    bot_service = BotService(uow)
+    state, status = bot_service.move("FFF")
+    assert state == State(x=0, y=2, direction=Direction.WEST)
+    assert status == Status.STOPPED

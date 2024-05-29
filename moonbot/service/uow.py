@@ -11,12 +11,17 @@ from moonbot.adapters.command_repository import (
     CommandRepository,
     SQLAlchemyCommandRepository,
 )
+from moonbot.adapters.obstacle_repository import (
+    ObstacleRepository,
+    SQLAlchemyObstacleRepository,
+)
 from moonbot.settings import settings
 
 
 class UnitOfWork(ABC):
     bot_state: BotStateRepository
     commands: CommandRepository
+    obstacles: ObstacleRepository
 
     def __enter__(self) -> "UnitOfWork":
         return self
@@ -49,6 +54,7 @@ class SqlAlchemyUnitOfWork(UnitOfWork):
         self._session = self._session_factory()
         self.bot_state = SQLAlchemyBotStateRepository(self._session)
         self.commands = SQLAlchemyCommandRepository(self._session)
+        self.obstacles = SQLAlchemyObstacleRepository(self._session)
         return super().__enter__()
 
     def __exit__(self, *args):
