@@ -1,3 +1,4 @@
+from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from moonbot.domain.bot import Direction
@@ -21,3 +22,12 @@ class Command(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     instructions: Mapped[str]
+
+
+class Obstacle(Base):
+    __tablename__ = "obstacle"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    x: Mapped[int]
+    y: Mapped[int]
+    __table_args__ = (UniqueConstraint("x", "y"),)
