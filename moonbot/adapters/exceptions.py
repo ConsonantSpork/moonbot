@@ -1,2 +1,2 @@
-class BotNotFound(Exception):
+class BotStateNotFound(Exception):
     pass

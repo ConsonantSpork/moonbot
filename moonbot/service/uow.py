@@ -3,7 +3,10 @@ from abc import ABC, abstractmethod
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from moonbot.adapters.bot_repository import BotRepository, SQLAlchemyBotRepository
+from moonbot.adapters.bot_repository import (
+    BotStateRepository,
+    SQLAlchemyBotStateRepository,
+)
 from moonbot.adapters.command_repository import (
     CommandRepository,
     SQLAlchemyCommandRepository,
@@ -12,7 +15,7 @@ from moonbot.settings import settings
 
 
 class UnitOfWork(ABC):
-    bot: BotRepository
+    bot_state: BotStateRepository
     commands: CommandRepository
 
     def __enter__(self) -> "UnitOfWork":
@@ -44,7 +47,7 @@ class SqlAlchemyUnitOfWork(UnitOfWork):
 
     def __enter__(self):
         self._session = self._session_factory()
-        self.bot = SQLAlchemyBotRepository(self._session)
+        self.bot_state = SQLAlchemyBotStateRepository(self._session)
         self.commands = SQLAlchemyCommandRepository(self._session)
         return super().__enter__()
 

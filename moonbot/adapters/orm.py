@@ -8,8 +8,8 @@ class Base(DeclarativeBase):
     pass
 
 
-class Bot(Base):
-    __tablename__ = "bot"
+class State(Base):
+    __tablename__ = "state"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     x: Mapped[int]

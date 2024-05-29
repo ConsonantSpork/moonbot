@@ -1,4 +1,4 @@
-from moonbot.adapters.exceptions import BotNotFound
+from moonbot.adapters.exceptions import BotStateNotFound
 from moonbot.domain.bot import Bot, Direction, State
 from moonbot.service.uow import UnitOfWork
 
@@ -11,25 +11,22 @@ class BotService:
 
     def _maybe_initialize_bot_state(self):
         try:
-            return self._uow.bot.get()
-        except BotNotFound:
-            bot = Bot(
-                DEFAULT_BOT_STATE.x, DEFAULT_BOT_STATE.y, DEFAULT_BOT_STATE.direction
-            )
-            self._uow.bot.update(bot)
+            return self._uow.bot_state.get()
+        except BotStateNotFound:
+            self._uow.bot_state.update(DEFAULT_BOT_STATE)
             self._uow.commit()
-            return bot
+            return DEFAULT_BOT_STATE
 
     def get_current_state(self) -> State:
         with self._uow:
-            bot = self._maybe_initialize_bot_state()
-        return bot.state
+            return self._maybe_initialize_bot_state()
 
     def move(self, command: str) -> State:
         with self._uow:
-            bot = self._maybe_initialize_bot_state()
+            state = self._maybe_initialize_bot_state()
+            bot = Bot(state.x, state.y, state.direction)
             bot.move(command)
-            self._uow.bot.update(bot)
+            self._uow.bot_state.update(bot.state)
             self._uow.commands.add(command)
             self._uow.commit()
         return bot.state

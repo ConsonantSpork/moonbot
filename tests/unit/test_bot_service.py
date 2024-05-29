@@ -1,24 +1,24 @@
 import pytest
 
-from moonbot.adapters.bot_repository import BotRepository
+from moonbot.adapters.bot_repository import BotStateRepository
 from moonbot.adapters.command_repository import CommandRepository
-from moonbot.adapters.exceptions import BotNotFound
-from moonbot.domain.bot import Bot, Direction
+from moonbot.adapters.exceptions import BotStateNotFound
+from moonbot.domain.bot import Bot, Direction, State
 from moonbot.service.bot_service import DEFAULT_BOT_STATE, BotService
 from moonbot.service.uow import UnitOfWork
 
 
-class FakeBotRepository(BotRepository):
+class FakeBotStateRepository(BotStateRepository):
     def __init__(self):
-        self._bot = None
+        self._state = None
 
-    def get(self) -> Bot:
-        if self._bot is None:
-            raise BotNotFound
-        return self._bot
+    def get(self) -> State:
+        if self._state is None:
+            raise BotStateNotFound
+        return self._state
 
-    def update(self, bot: Bot) -> None:
-        self._bot = bot
+    def update(self, state: State) -> None:
+        self._state = state
 
 
 class FakeCommandRepository(CommandRepository):
@@ -31,7 +31,7 @@ class FakeCommandRepository(CommandRepository):
 
 class FakeUnitOfWork(UnitOfWork):
     def __init__(self) -> None:
-        self.bot = FakeBotRepository()
+        self.bot_state = FakeBotStateRepository()
         self.commands = FakeCommandRepository()
         self.commited = False
 
@@ -45,7 +45,7 @@ class FakeUnitOfWork(UnitOfWork):
 @pytest.fixture
 def uow():
     uow = FakeUnitOfWork()
-    uow.bot.update(Bot(1, 2, Direction.WEST))
+    uow.bot_state.update(State(x=1, y=2, direction=Direction.WEST))
     return uow
 
 
@@ -58,7 +58,7 @@ def test_get_current_state(uow):
     bot_service = BotService(uow)
     state = bot_service.get_current_state()
     assert state
-    assert state == uow.bot.get().state
+    assert state == uow.bot_state.get()
 
 
 def test_move_returns_new_state(uow):
@@ -95,12 +95,11 @@ def test_move_updates_bot_state(uow):
 def test_get_current_state_initializes_bot_state(uow_no_bot_state):
     bot_service = BotService(uow_no_bot_state)
     bot_service.get_current_state()
-    state = uow_no_bot_state.bot.get().state
+    state = uow_no_bot_state.bot_state.get()
     assert state == DEFAULT_BOT_STATE
 
 
 def test_move_initializes_bot_state(uow_no_bot_state):
     bot_service = BotService(uow_no_bot_state)
     bot_service.move("BBFLRL")
-    state = uow_no_bot_state.bot.get().state
-    assert state
+    assert uow_no_bot_state.bot_state.get()
