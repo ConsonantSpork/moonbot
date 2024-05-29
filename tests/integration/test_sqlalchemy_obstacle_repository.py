@@ -40,8 +40,10 @@ def test_adding_duplicate_obstacle_does_nothing(repository):
     obstacle = (1, 2)
     repository.add(obstacle)
     session = repository._session
+    session.commit()
     obstacles = get_obstacles_from_db(session)
     repository.add(obstacle)
+    session.commit()
     obstacles_after_duplicate_add = get_obstacles_from_db(session)
     assert obstacles == obstacles_after_duplicate_add
 
